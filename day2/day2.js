@@ -7,7 +7,7 @@ fs.readFile('db.txt', 'utf8', (err, data) => {
   }
   let passwords = data.split('\n').map((line) => line.split(' '));
 
-  let validPass = passwords.map((password) => {
+  let validPass1 = passwords.map((password) => {
     // Get min and max
     let [min, max] = password[0].split('-');
 
@@ -16,15 +16,33 @@ fs.readFile('db.txt', 'utf8', (err, data) => {
 
     let pass = password[2];
 
-    return isValid(min, max, character, pass);
+    return isValidPart1(min, max, character, pass);
   });
 
+  let validPass2 = passwords.map((password) => {
+    // Get index1 and index2
+    let [index1, index2] = password[0].split('-');
+
+    // Get character
+    let character = password[1].substring(0, 1);
+
+    let pass = password[2];
+
+    return isValidPart2(index1, index2, character, pass);
+  });
+
+  // Part 1
   console.log(
-    validPass.reduce((acc, current) => (current ? acc + current : acc))
+    validPass1.reduce((acc, current) => (current ? acc + current : acc))
+  );
+
+  // Part 2
+  console.log(
+    validPass2.reduce((acc, current) => (current ? acc + current : acc))
   );
 });
 
-function isValid(min, max, character, password) {
+function isValidPart1(min, max, character, password) {
   let charCount = 0;
   while (password.includes(character)) {
     charCount++;
@@ -34,4 +52,11 @@ function isValid(min, max, character, password) {
   }
 
   return charCount <= max && charCount >= min;
+}
+
+function isValidPart2(index1, index2, character, password) {
+  let criteria1 = password.substring(index1 - 1, index1) === character;
+  let criteria2 = password.substring(index2 - 1, index2) === character;
+  let valid = criteria1 ^ criteria2;
+  return valid ? true : false;
 }
