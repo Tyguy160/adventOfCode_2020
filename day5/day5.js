@@ -24,13 +24,17 @@ function getSeatID(row, col) {
   return row * 8 + col;
 }
 
+// Read in the seats from the manifest
 fs.readFile('manifest.txt', 'utf8', (err, data) => {
   if (err) {
     console.error(err);
     return;
   }
 
+  //   Get an array of seats
   let ticketArray = data.split('\n');
+
+  //   Get an array of seatInfo objects
   let seatInfo = ticketArray.map((ticketNum) => {
     let [row, col] = getRC(ticketNum, 0, 127, 0, 7);
     let seatID = getSeatID(row, col);
@@ -40,11 +44,26 @@ fs.readFile('manifest.txt', 'utf8', (err, data) => {
       seatID,
     };
   });
-  let seatIds = seatInfo.map((seat) => seat['seatID']);
-  let maxSeatID = seatIds.reduce((a, b) => Math.max(a, b));
-  console.log(maxSeatID);
-});
 
-let [row, col] = getRC('BBFFBBFRLL', 0, 127, 0, 7);
-let seatID = getSeatID(row, col);
-console.log(row, col, seatID);
+  //   Get an array of seatIds and sort them in ascending order
+  let seatIds = seatInfo.map((seat) => seat['seatID']).sort((a, b) => a - b);
+
+  // Keep track of the missing seats
+  let missingSeats = [];
+  for (let i = 1; i < seatIds.length - 1; i++) {
+    if (seatIds[i - 1] !== seatIds[i] - 1) {
+      missingSeats.push(seatIds[i] - 1);
+    } else if (seatIds[i + 1] !== seatIds[i] + 1) {
+      missingSeats.push(seatIds[i] + 1);
+    }
+  }
+
+  //   Get the maximum seatID
+  let maxSeatID = seatIds.reduce((a, b) => Math.max(a, b));
+
+  // Part I
+  console.log(maxSeatID);
+
+  //   Part II
+  console.log(missingSeats);
+});
